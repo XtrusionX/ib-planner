@@ -483,6 +483,44 @@ a{color:var(--accent)}
 }
 @media (prefers-reduced-motion:reduce){.msheet,.mscrim,.grp h3 .gtog svg{transition:none}}
 
+/* ---------- quick notes: a sticky pad for tasks as they come to mind ---------- */
+.jotfab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:42;display:flex;align-items:center;gap:8px;height:48px;padding:0 16px 0 12px;border:0;border-radius:12px;background:var(--hi);color:var(--hi-ink);font:600 .95rem var(--f-body);box-shadow:0 1px 2px rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.10);cursor:pointer;transition:transform 140ms cubic-bezier(.22,1,.36,1)}
+.jotfab:active{transform:scale(.97)}
+.jotfab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.jotfab svg{width:20px;height:20px}
+.jotfab .n{font:500 12px/16px var(--f-mono);opacity:.75;font-variant-numeric:tabular-nums}
+.jotscrim{position:fixed;inset:0;z-index:47;background:rgba(10,14,22,.28);opacity:0;pointer-events:none;transition:opacity 200ms cubic-bezier(.22,1,.36,1)}
+.jotpad{position:fixed;z-index:48;right:16px;bottom:calc(80px + env(safe-area-inset-bottom,0px));width:min(380px,calc(100vw - 32px));max-height:min(560px,calc(100dvh - 120px));display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;background:#fff6c4;color:#1f1b10;border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 12px 32px rgba(0,0,0,.14);opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity 180ms cubic-bezier(.22,1,.36,1),transform 220ms cubic-bezier(.22,1,.36,1)}
+body.jot-open .jotscrim{opacity:1;pointer-events:auto}
+body.jot-open .jotpad{opacity:1;transform:none;pointer-events:auto}
+.jotpad header{position:static;display:flex;align-items:baseline;gap:8px;padding:16px 16px 8px;background:none;border:0}
+.jotpad h2{margin:0;font:600 1.15rem var(--f-display)}
+.jotpad header .meta{font:400 12px/16px var(--f-mono);color:#6b6346;font-variant-numeric:tabular-nums}
+.jotpad header .x{margin-left:auto;border:0;background:none;color:#6b6346;min-width:36px;min-height:36px;border-radius:8px;cursor:pointer;font-size:1rem}
+.jotpad form{display:flex;gap:8px;padding:0 16px 12px}
+.jotpad form input{flex:1;min-width:0;border:1px solid rgba(31,27,16,.14);background:#fffbe3;border-radius:10px;padding:10px 12px;font:400 16px var(--f-body);color:inherit}
+.jotpad form input:focus{outline:2px solid #1f1b10;outline-offset:0}
+.jotpad form button{border:0;border-radius:10px;background:#1f1b10;color:#fff6c4;font:600 .9rem var(--f-body);padding:0 16px;min-height:44px;cursor:pointer}
+.jotlist{overflow:auto;padding:0 8px 8px;overscroll-behavior:contain}
+.jotday{font:500 12px/16px var(--f-mono);color:#6b6346;padding:12px 8px 4px}
+.jotrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:start;gap:10px;padding:8px;border-radius:8px;background-image:linear-gradient(to top,rgba(31,27,16,.08) 1px,transparent 1px)}
+.jotrow input[type=checkbox]{width:20px;height:20px;margin:2px 0 0;accent-color:#1f1b10}
+.jotrow span{font:400 1rem/24px var(--f-body);overflow-wrap:anywhere;white-space:pre-wrap}
+.jotrow.done span{color:#8a8266;text-decoration:line-through;text-decoration-color:rgba(31,27,16,.35)}
+.jotrow .jdel{border:0;background:none;color:#8a8266;min-width:32px;min-height:32px;border-radius:8px;cursor:pointer;opacity:.6}
+.jotrow .jdel:hover,.jotrow .jdel:focus-visible{opacity:1;background:rgba(31,27,16,.06)}
+.jotempty{padding:16px 8px 24px;color:#6b6346;font-size:.95rem}
+.jotfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 16px 16px;border-top:1px solid rgba(31,27,16,.08)}
+.jotfoot button{border:0;background:none;color:#1f1b10;font:500 .9rem var(--f-body);min-height:36px;padding:0 4px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(31,27,16,.3)}
+.jotfoot button:disabled{opacity:.4;cursor:default;text-decoration:none}
+.jotfoot small{font:400 12px var(--f-mono);color:#6b6346}
+@media (max-width:720px){
+  .jotfab{bottom:calc(76px + env(safe-area-inset-bottom,0px));right:12px;height:44px}
+  .jotfab .lbl{display:none}
+  .jotpad{left:0;right:0;bottom:0;width:auto;max-height:82dvh;border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom,0px);transform:translateY(24px)}
+}
+@media (prefers-reduced-motion:reduce){.jotpad,.jotscrim,.jotfab{transition:none}}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -657,7 +695,7 @@ function defaults(){
   const done={},rag={};
   for(const [k,s] of Object.entries(SYL)) s.groups.forEach(([h,items],gi)=>items.forEach((raw,ii)=>{const p=parseItem(raw),id=topicId(k,gi,ii); if(p.done) done[id]=true; if(p.rag) rag[id]=p.rag}));
   const todos={}; for(const k of Object.keys(SUBJ)) todos[k]=(TODOS[k]||[]).map(t=>({id:uid(),t,done:false}));
-  return {v:2,done,rag,todos,tasks:[],grades:GRADES.map(g=>({n:g[0],l:g[1],v:g[2].slice()})),sched:migrateSched(SCHED),mocks:{},papers:MOCKS.map((m,i)=>({id:"m"+i,name:m[0],subj:m[1],date:m[2],prepped:false})),reading:{},focus:{},syl:sylClean(null),meth:methClean(null),prog:{},special:buildSpecial(),targets:TARGETS.map(t=>({...t})),goals:{...GOALS},goalFrom:{},doneMin:{},flog:{},res:{},unis:[]};
+  return {v:2,done,rag,todos,tasks:[],grades:GRADES.map(g=>({n:g[0],l:g[1],v:g[2].slice()})),sched:migrateSched(SCHED),mocks:{},papers:MOCKS.map((m,i)=>({id:"m"+i,name:m[0],subj:m[1],date:m[2],prepped:false})),reading:{},focus:{},syl:sylClean(null),meth:methClean(null),prog:{},special:buildSpecial(),targets:TARGETS.map(t=>({...t})),goals:{...GOALS},goalFrom:{},doneMin:{},flog:{},res:{},unis:[],jots:[]};
 }
 /* Each day is an ordered list of blocks: {id,k:"study"|"break",len,subj?}. Older saves stored six subject names per day. */
 function fromNames(v){let si=0;return SLOTS.map(x=>x.k==="study"?{id:uid(),k:"study",len:x.len,subj:SHORT2KEY[v[si++]]||"core"}:{id:uid(),k:"break",len:x.len})}
@@ -680,6 +718,7 @@ function merge(saved){ applyProfile(saved&&typeof saved==="object"?saved.profile
   if(!d.goalFrom||typeof d.goalFrom!=="object"||Array.isArray(d.goalFrom))d.goalFrom={};
   {const r={};const src=d.res&&typeof d.res==="object"&&!Array.isArray(d.res)?d.res:{};for(const k of Object.keys(src)){if(Array.isArray(src[k]))r[k]=src[k].filter(x=>x&&x.id&&typeof x.url==="string").map(x=>({id:String(x.id),url:x.url,title:String(x.title||""),note:String(x.note||"")}))}d.res=r}
   if(!d.special||typeof d.special!=="object"||Array.isArray(d.special))d.special=buildSpecial();
+  d.jots=Array.isArray(d.jots)?d.jots.filter(x=>x&&x.id&&typeof x.t==="string").map(x=>({id:x.id,t:x.t,at:+x.at||Date.now(),done:!!x.done,doneAt:x.doneAt||null})):[];
   d.unis=Array.isArray(d.unis)?d.unis.filter(x=>x&&x.id&&x.uni&&x.course):[];
   if(!d.uniEst||typeof d.uniEst!=="object"||Array.isArray(d.uniEst))d.uniEst={};
   if(!Array.isArray(d.targets))d.targets=TARGETS.map(t=>({...t}));
@@ -1121,7 +1160,7 @@ function obFinish(){
   const sched=genWeek(subs,OB.wd,OB.we,OB.blk,OB.brk);
   const syl={},meth={},todos={core:[]};subs.forEach((s,i)=>{syl[s.key]=parseSyl(OB.syl[i]);meth[s.key]={steps:[],note:""};todos[s.key]=[]});
   const fresh={v:2,profile,done:{},rag:{},todos,tasks:[],grades:[...subs.map(s=>({n:s.name,l:s.level,v:[0,0,0,0,0]})),{n:"Core (TOK/EE)",l:"",v:[0,0,0,0,0]}],sched,mocks:{},
-    papers:OB.papers.filter(p=>p.name.trim()&&/^\d{4}-\d{2}-\d{2}$/.test(p.date)).map(p=>({id:uid(),name:p.name.trim(),subj:p.subj,date:p.date,prepped:false})),reading:{},focus:{},syl,meth,prog:{},special:{},targets:[],goals:{},goalFrom:{},doneMin:{},flog:{},res:{},unis:[]};
+    papers:OB.papers.filter(p=>p.name.trim()&&/^\d{4}-\d{2}-\d{2}$/.test(p.date)).map(p=>({id:uid(),name:p.name.trim(),subj:p.subj,date:p.date,prepped:false})),reading:{},focus:{},syl,meth,prog:{},special:{},targets:[],goals:{},goalFrom:{},doneMin:{},flog:{},res:{},unis:[],jots:[]};
   state=merge(fresh);needsSetup=false;sylSel=sylKeys()[0];weekDay=DAYS[new Date().getDay()];
   save();syncTimerIdx();
   if(location.hash&&location.hash!=="#today")location.hash="#today";else{current="today";render()}
@@ -1430,6 +1469,38 @@ function decorateGroups(){if(current!=="syllabus")return;const gs=[...document.q
     const title=h.firstChild;if(title&&title.nodeType===3){const s=document.createElement("span");s.textContent=title.textContent;t.appendChild(s);title.replaceWith(t)}else h.prepend(t)})}
 document.getElementById("app").addEventListener("click",e=>{const t=e.target.closest("[data-gtog]");if(!t)return;const gi=+t.dataset.gtog,g=t.closest(".grp"),open=g.classList.contains("closed");grpOpen[sylSel+"|"+gi]=open;g.classList.toggle("closed",!open);t.setAttribute("aria-expanded",open)});
 
+/* ---------- quick notes: standalone sticky pad, not linked to subjects or the schedule ---------- */
+const jotFab=document.createElement("button");jotFab.type="button";jotFab.className="jotfab";jotFab.hidden=true;jotFab.setAttribute("aria-haspopup","dialog");
+const jotScrim=document.createElement("div");jotScrim.className="jotscrim";
+const jotPad=document.createElement("section");jotPad.className="jotpad";jotPad.setAttribute("role","dialog");jotPad.setAttribute("aria-label","Quick notes");jotPad.inert=true;
+document.body.append(jotScrim,jotPad,jotFab);
+const jotIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v10l-6 6H5z"/><path d="M13 20v-6h6M9 9h6M9 12.5h3"/></svg>';
+const jots=()=>Array.isArray(state.jots)?state.jots:(state.jots=[]);
+const jotDayLabel=ds=>{const t=iso(new Date()),y=iso(new Date(Date.now()-864e5));if(ds===t)return "Today";if(ds===y)return "Yesterday";const d=new Date(ds+"T12:00:00");return d.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"})};
+function jotFabSync(){const gate=typeof booting!=="undefined"&&(booting||needsSetup);jotFab.hidden=gate;if(gate)jotOpen(false);const n=jots().filter(j=>!j.done).length;jotFab.innerHTML=`${jotIco}<span class="lbl">Notes</span>${n?`<span class="n">${n}</span>`:""}`;jotFab.setAttribute("aria-label",`Quick notes, ${n} open`)}
+function jotRender(keepFocus){
+  const L=jots(),open=L.filter(j=>!j.done).length,doneN=L.length-open;
+  const byDay=[];L.slice().sort((a,b)=>b.at-a.at).forEach(j=>{const ds=iso(new Date(j.at));let g=byDay.find(x=>x.ds===ds);if(!g)byDay.push(g={ds,items:[]});g.items.push(j)});
+  byDay.forEach(g=>g.items.sort((a,b)=>(a.done-b.done)||(b.at-a.at)));
+  const val=(jotPad.querySelector("#jotIn")||{}).value||"";
+  jotPad.innerHTML=`<header><h2>Notes</h2><span class="meta">${open} to do</span><button type="button" class="x" data-jclose="1" aria-label="Close notes">✕</button></header>
+  <form id="jotForm" autocomplete="off"><input id="jotIn" type="text" enterkeyhint="done" placeholder="Something to do" aria-label="New note" maxlength="300"><button>Add</button></form>
+  <div class="jotlist">${byDay.length?byDay.map(g=>`<div class="jotday">${esc(jotDayLabel(g.ds))}</div>${g.items.map(j=>`<label class="jotrow${j.done?" done":""}"><input type="checkbox" data-jtick="${j.id}" ${j.done?"checked":""}><span>${esc(j.t)}</span><button type="button" class="jdel" data-jdel="${j.id}" aria-label="Delete note: ${esc(j.t)}">✕</button></label>`).join("")}`).join(""):`<p class="jotempty">Jot anything you need to do as it comes to mind. It stays here until you tick it off.</p>`}</div>
+  <div class="jotfoot"><small>${L.length} note${L.length===1?"":"s"}</small><button type="button" data-jclear="1" ${doneN?"":"disabled"}>Clear ${doneN||""} ticked</button></div>`;
+  const inp=jotPad.querySelector("#jotIn");inp.value=val;if(keepFocus)inp.focus();
+  jotFabSync();
+}
+function jotOpen(on){document.body.classList.toggle("jot-open",on);jotPad.inert=!on;jotFab.setAttribute("aria-expanded",on);if(on){if(typeof moreOpen==="function")moreOpen(false);jotRender(false);setTimeout(()=>{const i=jotPad.querySelector("#jotIn");if(i)i.focus()},60)}else if(document.activeElement&&jotPad.contains(document.activeElement))jotFab.focus()}
+jotFab.addEventListener("click",()=>jotOpen(!document.body.classList.contains("jot-open")));
+jotScrim.addEventListener("click",()=>jotOpen(false));
+jotPad.addEventListener("submit",e=>{e.preventDefault();const i=jotPad.querySelector("#jotIn"),t=(i.value||"").trim();if(!t)return;jots().push({id:uid(),t,at:Date.now(),done:false});i.value="";save();jotRender(true)});
+jotPad.addEventListener("change",e=>{const id=e.target.dataset.jtick;if(!id)return;const j=jots().find(x=>x.id===id);if(j){j.done=e.target.checked;j.doneAt=j.done?Date.now():null;save();jotRender(false)}});
+jotPad.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
+  if(d.jclose)jotOpen(false);
+  else if(d.jdel){e.preventDefault();const L=jots(),i=L.findIndex(x=>x.id===d.jdel);if(i<0)return;const x=L.splice(i,1)[0];save();jotRender(false);toast("Note deleted","Undo",()=>{jots().splice(i,0,x);save();jotRender(false)})}
+  else if(d.jclear){const L=jots(),gone=L.filter(x=>x.done);state.jots=L.filter(x=>!x.done);save();jotRender(false);toast(`Cleared ${gone.length} ticked`,"Undo",()=>{state.jots=state.jots.concat(gone);save();jotRender(false)})}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("jot-open"))jotOpen(false)});
+
 /* ---------- render + events ---------- */
 const VIEWS={today:vToday,week:vWeek,focus:vFocus,syllabus:vSyllabus,mocks:vMocks,grades:vGrades,tasks:vTasks,resources:vResources,reading:vReading,unis:vUnis};
 let current="today";
@@ -1446,7 +1517,7 @@ function render(){
   if(PROFILE&&current==="reading")current="today";
   app.innerHTML=VIEWS[current]();
   open.forEach(([k,o])=>{const d=$(`details.subj[data-k="${k}"]`);if(d)d.open=o});
-  document.querySelectorAll("#tabs a").forEach(a=>a.setAttribute("aria-current",a.getAttribute("href")==="#"+current?"page":"false"));try{syncBtabs();decorateGroups()}catch(e){}
+  document.querySelectorAll("#tabs a").forEach(a=>a.setAttribute("aria-current",a.getAttribute("href")==="#"+current?"page":"false"));try{syncBtabs();decorateGroups();jotFabSync();if(document.body.classList.contains("jot-open")&&!jotPad.contains(document.activeElement))jotRender(false)}catch(e){}
   const nm=nextMock();$("#hdrCount").textContent=nm?`${nm.d}d to ${PROFILE?"exams":"mocks"}`:PROFILE?"No exams yet":"Mocks done";
   if(current==="today")drawTimer();
   window.scrollTo(0,y);
